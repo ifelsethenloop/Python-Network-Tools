@@ -9,5 +9,3 @@ Defaults
   --remoteServer = localhost
   --start-port = 1
   --end-port = 100
-
-
