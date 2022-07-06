@@ -4,8 +4,3 @@ Python Port Scanner
 
 ## Command line arguments
 usage: python_port_scanner.py [-h] [--remoteServer REMOTESERVERIP] [--start-port START_PORT] [--end-port END_PORT]
-
-Defaults
-  --remoteServer = localhost
-  --start-port = 1
-  --end-port = 100
