@@ -1,4 +1,4 @@
-#! /usr/bin/python
+# /usr/bin/python
 # Filename : test_port_scanner.py
 
 """
@@ -17,19 +17,19 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
     subprocess.call('clear', shell=True)
 
     # Ask for input
-    remoteServer = raw_input("Enter a remote host to scan: ")
+    remoteServer = input("Enter a remote host to scan: ")
     remoteServerIP = socket.gethostbyname(remoteServer)
-    start_port = raw_input("Enter begining port number: ")
-    end_port = raw_input("Enter end port number: ")
+    start_port = input("Enter begining port number: ")
+    end_port = input("Enter end port number: ")
     start_port = int(start_port)
     end_port = int(end_port)
 
     # Print a banner with information on which host we are about to scan
-    print "-" * 60
-    print "Please wait, scanning remote host", remoteServerIP
-    print "On ports: ", start_port, "to", end_port
-    print "-" * 60
-    print '\n'
+    print ("-" * 60)
+    print ("Please wait, scanning remote host", remoteServerIP)
+    print ("On ports: ", start_port, "to", end_port)
+    print ("-" * 60)
+    print ('\n')
 
     # Check what time the scan started
     begin_time = datetime.now()
@@ -41,20 +41,20 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex((remoteServerIP, port))
             if result == 0:
-                print "Port {}: \t Open".format(port)
+                print ("Port {}: \t Open".format(port))
             sock.close()
 
     # Error handling in the event host cannot be reached or no DNS available
     except KeyboardInterrupt:
-        print "You pressed Ctrl+C"
+        print ("You pressed Ctrl+C")
         sys.exit()
 
     except socket.gaierror:
-        print 'Hostname could not be resolved. Exiting'
+        print ('Hostname could not be resolved. Exiting')
         sys.exit()
 
     except socket.error:
-        print 'Socket creation failed. Error code: ' + str(err_msg[0]) + ' Error message: ' + err_msg[1]
+        print ('Socket creation failed. Error code: ' + str(socket.error[0]) + ' Error message: ' + socket.error[1])
         sys.exit()
 
     # Check the time once scan is complete, and compare the start - end times.
@@ -62,10 +62,10 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
     total = end_time - begin_time
 
     # Print the scan time information
-    print '\n'
-    print '-' * 60
-    print 'Scanning Completed in: ', total
-    print '-' * 60
+    print ('\n')
+    print ('-' * 60)
+    print ('Scanning Completed in: ', total)
+    print ('-' * 60)
 
 if __name__ == "__main__":
     # Command line arguments
