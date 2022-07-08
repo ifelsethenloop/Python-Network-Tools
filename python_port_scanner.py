@@ -16,11 +16,7 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
     # Clear the screen
     subprocess.call('clear', shell=True)
 
-    # Ask for input
-    remoteServer = input("Enter a remote host to scan: ")
     remoteServerIP = socket.gethostbyname(remoteServer)
-    start_port = input("Enter begining port number: ")
-    end_port = input("Enter end port number: ")
     start_port = int(start_port)
     end_port = int(end_port)
 
@@ -75,5 +71,4 @@ if __name__ == "__main__":
     parser.add_argument('--end-port', action="store", dest="end_port", default=100, type=int)
     # Parse arguments
     given_args = parser.parse_args()
-    remoteServerIP, start_port, end_port = given_args.remoteServerIP, given_args.start_port, given_args.end_port
-    scan_ports(remoteServerIP, start_port, end_port)
+    scan_ports(given_args.remoteServerIP, given_args.start_port, given_args.end_port)
