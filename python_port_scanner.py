@@ -1,4 +1,4 @@
-# /usr/bin/python
+# /usr/bin/python3
 # Filename : test_port_scanner.py
 
 """
@@ -35,6 +35,7 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
     try:
         for port in range(start_port, end_port):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            socket.setdefaulttimeout(1)
             result = sock.connect_ex((remoteServerIP, port))
             if result == 0:
                 print ("Port {}: \t Open".format(port))
