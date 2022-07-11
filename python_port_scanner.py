@@ -11,7 +11,7 @@ import sys
 import argparse
 from datetime import datetime
 
-def scan_ports(remoteServer, start_port='1', end_port='1000'):
+def scan_ports(remoteServer, start_port='443', end_port='445'):
 
     # Clear the screen
     subprocess.call('clear', shell=True)
@@ -30,7 +30,7 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
     # Check what time the scan started
     begin_time = datetime.now()
 
-    # Take the user input of 'start_port' and 'end_port' numbers and place them in a range
+    # Take the arguments of 'start_port' and 'end_port' numbers and place them in a range
     # These are the port numbers to be scanned
     try:
         for port in range(start_port, end_port):
@@ -39,11 +39,11 @@ def scan_ports(remoteServer, start_port='1', end_port='1000'):
             result = sock.connect_ex((remoteServerIP, port))
             if result == 0:
                 print ("Port {}: \t Open".format(port))
-            sock.close()
+                sock.close()
 
     # Error handling in the event host cannot be reached or no DNS available
     except KeyboardInterrupt:
-        print ("You pressed Ctrl+C")
+        print ("User interrput exit")
         sys.exit()
 
     except socket.gaierror:
