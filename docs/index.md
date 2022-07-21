@@ -34,7 +34,7 @@ __sys__ __argparse__ and __datetime__ are very common python libraries and used 
 
 Next create a function to:
 
-1. Collect user input
+1. Take arguments from the user
 2. Scan ports entered via the input
 3. Print the information to the screen
 4. Begin the scan
@@ -44,25 +44,23 @@ Next create a function to:
 
 __Collect user input__
 
-The user is asked for IP address or hostname (our app supports FQDN entries) and a range of port numbers, to enter just a single port number 80 for example the user will enter (79, 80)
+Set relevant variables:
+remoteServerIP - server IP address, hostname or FQDN
+start_port - Which TCP port number to begin the scan on
+end_port - Which TCP port number to end the scan on
+Defaults are 443 and 445 with localhost as the default hostname/IP. 
+
+These variables are defined with user arguments explained towards the end of this doc
 
 ```python
-def scan_ports(remoteServer, start_port='1', end_port='1024'):
+def scan_ports(remoteServer, start_port='443', end_port='445'):
 
     # Clear the screen
-    """
-
-    :rtype : object
-    """
     subprocess.call('clear', shell=True)
 
-    # Ask for input
-    remoteServer = input("Enter a remote host to scan: ")
-    start_port = input("Enter beginning port number: ")
-    end_port = input("Enter end port number: ")
+    remoteServerIP = socket.gethostbyname(remoteServer)
     start_port = int(start_port)
     end_port = int(end_port)
-    
 ```
 __Print information to screen__
 
@@ -71,7 +69,7 @@ Here we are simply taking the user input from the previous section and printing 
 ```python
     # Print a banner with information on which host we are about to scan
     print ("-" * 60)
-    print ("Please wait, scanning remote host", remoteServer)
+    print ("Please wait, scanning remote host", remoteServerIP)
     print ("On ports: ", start_port, "to", end_port)
     print ("-" * 60)
     print ('\n')
@@ -96,25 +94,17 @@ Provide the results to a new object `result = sock.connect_ex((remoteServerIP, p
 The complete code for this section is below:
 
 ```python
-    # Check what time the scan started
-    begin_time = datetime.now()
 
-    # Take the user input of 'start_port' and 'end_port' numbers and place them in a range
+    # Take the arguments of 'start_port' and 'end_port' numbers and place them in a range
     # These are the port numbers to be scanned
     try:
-        remoteServerIP = socket.gethostbyname(remoteServer)
         for port in range(start_port, end_port):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
+            socket.setdefaulttimeout(1)
             result = sock.connect_ex((remoteServerIP, port))
-            # print(result) - Can be used to test reply codes, 0=ok, 61=TCP RST, etc...
             if result == 0:
-                print("Port {}: \t Open".format(port))
-            elif result == 61:
-                print("Port {}: \t Rejected by Host".format(port))
-            else:
-                print("Port {}: \t Timed Out".format(port))
-            sock.close()
+                print ("Port {}: \t Open".format(port))
+                sock.close()
 ```
 
 __Check for errors and print results__
@@ -124,15 +114,15 @@ Once we have the results we can print them to the screen or print the relevant e
 ```python
     # Error handling in the event host cannot be reached or no DNS available
     except KeyboardInterrupt:
-        print("You pressed Ctrl+C")
+        print ("User interrput exit")
         sys.exit()
 
     except socket.gaierror:
-        print('Hostname could not be resolved. Exiting')
+        print ('Hostname could not be resolved. Exiting')
         sys.exit()
 
     except socket.error:
-        print('Socket creation failed. Error code: ' + str(err_msg[0]) + ' Error message: ' + err_msg[1])
+        print ('Socket creation failed. Error code: ' + str(socket.error[0]) + ' Error message: ' + socket.error[1])
         sys.exit()
 
     # Check the time once scan is complete, and compare the start - end times.
@@ -143,11 +133,25 @@ Once we have the results we can print them to the screen or print the relevant e
     print ('\n')
     print ('-' * 60)
     print ('Scanning Completed in: ', total)
-    print('Remote Host IP: ', remoteServerIP)
     print ('-' * 60)
 ```
 
-The rest is generic argrparse input and script execution logic, used to determine defaults for when the script is run
+The rest is generic argrparse input and script execution logic, used to determine defaults for when the script is run.
+This is where we map our initial variables of 'remoteServerIP' 'start_port' 'end_port'
+There is also a help function which can be run with `python3 python_port_scanner.py -h` example below:
+
+```
+➜  Python-Network-Tools git:(master) ✗ python3 python_port_scanner.py -h
+usage: python_port_scanner.py [-h] [--remoteServer REMOTESERVERIP] [--start-port START_PORT] [--end-port END_PORT]
+
+Remote Port Scanner
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --remoteServer REMOTESERVERIP
+  --start-port START_PORT
+  --end-port END_PORT
+```
 
 ```python
 if __name__ == "__main__":
@@ -158,8 +162,7 @@ if __name__ == "__main__":
     parser.add_argument('--end-port', action="store", dest="end_port", default=100, type=int)
     # Parse arguments
     given_args = parser.parse_args()
-    remoteServerIP, start_port, end_port = given_args.remoteServerIP, given_args.start_port, given_args.end_port
-    scan_ports(remoteServerIP, start_port, end_port)
+    scan_ports(given_args.remoteServerIP, given_args.start_port, given_args.end_port)
 ```
 
 #### Results and test scan
@@ -169,24 +172,18 @@ Below is a simple scan to google.com, as mentioned we resolve domain names also 
 We can confirm that port 79 was rejected by the host, meaning we did receive a response from google, and it did not just drop our TCP SYN packet...
 
 ```bash
-$ python3 test_port_scanner.py 
-
-Enter a remote host to scan: www.google.com
-Enter beginning port number: 79
-Enter end port number: 81
+➜  Python-Network-Tools git:(master) ✗ python3 python_port_scanner.py --remoteServer www.google.com --start-port 443 --end-port 444
 ------------------------------------------------------------
-Please wait, scanning remote host www.google.com
-On ports:  79 to 81
+Please wait, scanning remote host 172.217.24.36
+On ports:  443 to 444
 ------------------------------------------------------------
 
 
-Port 79: 	 Rejected by Host
-Port 80: 	 Open
+Port 443: 	 Open
 
 
 ------------------------------------------------------------
-Scanning Completed in:  0:00:00.131264
-Remote Host IP:  216.58.220.132
+Scanning Completed in:  0:00:00.010012
 ------------------------------------------------------------
 ```
 
@@ -196,7 +193,7 @@ The sample provided is just a small and quick script (about 50 lines of actual c
 
 * Append results to a file, txt, csv
 * Graph the results with something like matplotlib or Pyplot
-* Create a GUI for the tool with Tkinter or something supporting multiple platforms like Kivy
+* Create a GUI for the tool with Tkinter or something like flask
 * Turn this into a simple .exe file and make it portable
 
 
